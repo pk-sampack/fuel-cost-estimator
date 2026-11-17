@@ -139,7 +139,9 @@ export function ResultScreen({ bundle, profile, lang, onEditTrip, onEditProfile 
         </div>
         {summary.durationS !== null ? (
           <div className="meta-line">
-            <span className="meta-key">{t('route.travelTime')}</span>
+            <span className="meta-key">
+              {t(summary.returnEmpty ? 'result.travelTimeRound' : 'route.travelTime')}
+            </span>
             <span className="meta-val" dir="ltr">{formatDuration(summary.durationS, lang)}</span>
           </div>
         ) : null}
@@ -183,12 +185,21 @@ function buildShareText({ estimate, summary }: ResultBundle, lang: Lang): string
         ? `${summary.origin.ur} سے ${summary.destination.ur}`
         : `${summary.origin.en} to ${summary.destination.en}`
       : `${num(summary.distanceKm, 1)} ${lang === 'ur' ? 'کلومیٹر' : 'km'}`;
+  const durationLabel = summary.returnEmpty
+    ? lang === 'ur'
+      ? 'سفر کا وقت (آنا جانا)'
+      : 'Travel time (round trip)'
+    : lang === 'ur'
+      ? 'سفر کا وقت'
+      : 'Travel time';
+  const durationLine =
+    summary.durationS !== null ? `${durationLabel}: ${formatDuration(summary.durationS, lang)}` : null;
   const lines =
     lang === 'ur'
       ? [
           'ایندھن — سفر کا اندازہ',
           trip,
-          ...(summary.durationS !== null ? [`سفر کا وقت: ${formatDuration(summary.durationS, lang)}`] : []),
+          ...(durationLine ? [durationLine] : []),
           `فاصلہ: ${num(summary.distanceKm, 1)} کلومیٹر`,
           `${fuelLabel}: ${num(price.pricePerLitre, 2)} روپے فی لیٹر (${compactDate(price.effectiveFrom)})`,
           ...estimate.legs.map(
@@ -202,7 +213,7 @@ function buildShareText({ estimate, summary }: ResultBundle, lang: Lang): string
       : [
           'Fuel — trip estimate',
           trip,
-          ...(summary.durationS !== null ? [`Travel time: ${formatDuration(summary.durationS, lang)}`] : []),
+          ...(durationLine ? [durationLine] : []),
           `Distance: ${num(summary.distanceKm, 1)} km`,
           `${fuelLabel}: Rs ${num(price.pricePerLitre, 2)} per litre (${compactDate(price.effectiveFrom)})`,
           ...estimate.legs.map(

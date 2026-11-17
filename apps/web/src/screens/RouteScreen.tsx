@@ -102,6 +102,8 @@ export function RouteScreen({ vehicleTypes, prices, profile, lang, onEditProfile
 
   const localKm = parseDecimal(manualKm);
   const distanceKm = manualMode ? localKm : routeInfo.km;
+  const routeDurationS =
+    manualMode || routeInfo.durationS === null ? null : routeInfo.durationS * (returnEmpty ? 2 : 1);
   const tollValue = tolls.trim() ? parseDecimal(tolls) ?? 0 : 0;
   const canCalculate = Boolean(vehicle) && Boolean(distanceKm && distanceKm > 0) && profile.kmpl > 0 && !busy;
 
@@ -152,7 +154,7 @@ export function RouteScreen({ vehicleTypes, prices, profile, lang, onEditProfile
         origin: originName,
         destination: destinationName,
         distanceKm,
-        durationS: manualMode ? null : routeInfo.durationS,
+        durationS: routeDurationS,
         fuelType,
         loadRatio: isGoods ? loadRatio : 0,
         returnEmpty,
@@ -251,9 +253,10 @@ export function RouteScreen({ vehicleTypes, prices, profile, lang, onEditProfile
         <button type="button" className="link" onClick={toggleManual}>
           {manualMode ? t('route.useMapDistance') : t('route.editDistance')}
         </button>
-        {!manualMode && routeInfo.km !== null && routeInfo.durationS !== null ? (
+        {!manualMode && routeInfo.km !== null && routeDurationS !== null ? (
           <p className="hint distance-time">
-            {t('route.travelTime')}: <span dir="ltr">{formatDuration(routeInfo.durationS, lang)}</span>
+            {t(returnEmpty ? 'result.travelTimeRound' : 'route.travelTime')}:{' '}
+            <span dir="ltr">{formatDuration(routeDurationS, lang)}</span>
           </p>
         ) : null}
       </div>
