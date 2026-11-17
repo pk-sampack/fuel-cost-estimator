@@ -1,0 +1,52 @@
+
+Rules:
+- Version the engine (`v1`). Same inputs → same output. No side effects, no DB reads inside the function.
+- Goods vehicles: empty return leg calculated with `load_ratio = 0`, shown as a **separate line**.
+- Round to nearest **Rs 10** in Phase 2 (Phase 1: plain rounding, document it).
+- Ship **golden-case tests** covering: car, rickshaw, wagon, Bolan, Shehzore, Mazda, Hino, trailer; empty/half/full; with and without `kmpl_full`; empty return leg; zero-toll and manual-toll cases.
+
+---
+
+## 3. Phase 1 build order (only this phase)
+
+**Goal:** a driver can get a usable cost estimate end to end, with no sign-up.
+
+1. **Repo + CI skeleton** — monorepo (app / api / admin), GitHub Actions, staging + prod config, Sentry wired.
+2. **Calculation engine + golden tests** — pure TypeScript module, fully tested before any UI touches it.
+3. **Database + migrations** — reference-data schema only (no driver/trip tables). Seed `vehicle_types` (40 presets from discovery, or sensible defaults if discovery hasn't happened) and initial `fuel_prices`.
+4. **NestJS API (Phase 1 endpoints only)** — validation, rate limiting, device token middleware, fuel-price service, routing proxy with cache.
+5. **Admin panel (React-Admin)** — fuel price entry with effective date + approval; vehicle type settings. Staff MFA.
+6. **Flutter app (Urdu-first)** — three screens, vehicle profile saved on phone, load picker with pictures, Places autocomplete via backend proxy, result screen listing **distance, fuel price + its date, toll, formula version**.
+7. **Sharing** — result as text to WhatsApp. Nothing saved on the server.
+8. **Field validation** — run against ≥ 30 real trips; results within ~10% of fuel receipts; crash-free > 99%; result < 3s on 4G; 50 beta drivers across 2–3 cities.
+
+---
+
+## 4. Explicitly out of scope for this build
+
+Do **not** implement: accounts/login, driver data on server, trip/quote history, saved routes, multiple vehicle profiles, fuel-cost tracking, automatic fuel prices, toll table (Phase 2), voice (Phase 3), AI (Phase 4), multi-stop, iOS, web, partner API.
+
+---
+
+## 5. Definition of done (Phase 1)
+
+- [ ] `ui-ux-pro-max`-quality Urdu RTL UI on all three screens; large touch targets; picture-first vehicle and load pickers; minimal typing.
+- [ ] Vehicle profile (type + km/l, optional kmpl_full) persisted **on device only**, editable in one tap.
+- [ ] Calculation engine `v1` pure, versioned, golden-tested; same inputs → same output.
+- [ ] Phase 1 endpoints implemented, validated, rate-limited, contract-tested.
+- [ ] Fuel price shown **with its effective date** on the result screen.
+- [ ] Result screen lists distance, fuel price + date, toll, formula version, total; shareable as WhatsApp text.
+- [ ] Admin panel: fuel prices (with effective date + approval) and vehicle type settings; staff MFA; audit log.
+- [ ] No driver/trip/quote/fuel-log tables; route cache stores rounded keys only.
+- [ ] CI/CD to staging + prod; Sentry; backups; staged rollout plan.
+- [ ] Exit criteria met: ~10% accuracy on ≥ 30 field trips, > 99% crash-free, < 3s result on 4G, 50 beta drivers in 2–3 cities.
+- [ ] Privacy policy in Urdu; legal obligations confirmed with local counsel.
+
+---
+
+## 6. Progress logging & token-safe resume (MANDATORY)
+
+The build must survive a disconnect, crash, or token exhaustion without losing work or context. Log every meaningful step to disk so the next session can resume cheaply.
+
+### 6.1 The build journal
+Maintain a single append-only file at the repo root:

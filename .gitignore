@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/output/
+.data/
+.env
+.env.local
+*.log
+coverage/
+.DS_Store
+.vite/
+.taste-skill/
+apps/api/uploads/
+*.tsbuildinfo
+*.pid
+__pycache__/
+*.pyc
