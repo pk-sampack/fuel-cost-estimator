@@ -192,7 +192,7 @@ function buildShareText({ estimate, summary }: ResultBundle, lang: Lang): string
           `فارمولا ${estimate.calcVersion} · یہ صرف اندازہ ہے`,
         ]
       : [
-          'Eendhan — trip estimate',
+          'Fuel — trip estimate',
           trip,
           `Distance: ${num(summary.distanceKm, 1)} km`,
           `${fuelLabel}: Rs ${num(price.pricePerLitre, 2)} per litre (${compactDate(price.effectiveFrom)})`,

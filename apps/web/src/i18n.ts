@@ -107,7 +107,7 @@ const ur: Dict = {
 };
 
 const en: Dict = {
-  'app.name': 'Eendhan',
+  'app.name': 'Fuel',
   'app.tagline': 'Trip cost',
   'app.footer': 'An estimate, not a bill.',
   'nav.vehicle': 'Vehicle',
