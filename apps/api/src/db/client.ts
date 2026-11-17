@@ -14,10 +14,25 @@ export interface SqlClient extends TxClient {
   close(): Promise<void>;
 }
 
+function postgresPoolOptions(databaseUrl: string) {
+  const parsed = new URL(databaseUrl);
+  const sslMode = parsed.searchParams.get('sslmode');
+  const requiresTls = sslMode !== null && sslMode !== 'disable';
+  const verifiesCertificate = sslMode === 'verify-full' || sslMode === 'verify-ca';
+  parsed.searchParams.delete('sslmode');
+  return {
+    connectionString: parsed.toString(),
+    ssl: requiresTls ? { rejectUnauthorized: verifiesCertificate } : false,
+    max: 3,
+    idleTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 10_000,
+  };
+}
+
 export async function createSqlClient(cfg: AppConfig): Promise<SqlClient> {
   if (cfg.dbDriver === 'postgres') {
     if (!cfg.databaseUrl) throw new Error('DATABASE_URL missing');
-    const pool = new Pool({ connectionString: cfg.databaseUrl, max: 10 });
+    const pool = new Pool(postgresPoolOptions(cfg.databaseUrl));
     return {
       async query<T>(sql: string, params?: readonly unknown[]) {
         const result = await pool.query(sql, params as unknown[] | undefined);
