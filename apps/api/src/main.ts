@@ -7,6 +7,7 @@ import { initSentry } from './common/sentry';
 import { ApiExceptionFilter } from './common/exception.filter';
 import { createSqlClient } from './db/client';
 import { runMigrations } from './db/migrator';
+import { AdminAuthService } from './modules/admin/auth.service';
 
 async function bootstrap(): Promise<void> {
   initSentry();
@@ -26,6 +27,12 @@ async function bootstrap(): Promise<void> {
   app.enableCors({ origin: config.origins, methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'] });
   app.useGlobalFilters(new ApiExceptionFilter());
   app.enableShutdownHooks();
+
+  if (config.adminEmail && config.adminPassword) {
+    const auth = app.get(AdminAuthService);
+    const { created } = await auth.ensureBootstrapAdmin(config.adminEmail, config.adminPassword);
+    if (created) console.log(`bootstrap admin created: ${config.adminEmail}`);
+  }
 
   await app.listen(config.port, '0.0.0.0');
   console.log(`fce-api listening on :${config.port} (${config.nodeEnv}, ${config.dbDriver})`);

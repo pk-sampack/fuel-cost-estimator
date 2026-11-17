@@ -10,7 +10,13 @@ import type {
 } from '@fce/contracts';
 import { getDeviceToken } from './storage';
 
-const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:3000/v1';
+const runtimeBase =
+  typeof window !== 'undefined' ? (window.__FCE_API_BASE__ ?? '').trim() : '';
+const BASE = (
+  runtimeBase ||
+  (import.meta.env.VITE_API_BASE as string | undefined) ||
+  'http://localhost:3000/v1'
+).replace(/\/+$/, '');
 
 export class ApiError extends Error {
   readonly code: string;

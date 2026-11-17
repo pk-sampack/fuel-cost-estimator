@@ -1,0 +1,40 @@
+# Render Blueprint: NestJS API + Postgres for the Fuel Cost Estimator.
+# Deploy: https://render.com/deploy?repo=https://github.com/pk-sampack/fuel-cost-estimator
+#
+# Note: Render's free Postgres expires 30 days after creation. To use Neon instead,
+# delete the `databases` block and set DATABASE_URL manually in the dashboard.
+
+databases:
+  - name: fuel-cost-db
+    databaseName: fuelcost
+    user: fuelcost
+    plan: free
+    postgresMajorVersion: '16'
+
+services:
+  - type: web
+    name: fuel-cost-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build -w @fce/contracts && npm run build -w @fce/engine && npm run build -w @fce/api
+    startCommand: node apps/api/dist/main.js
+    healthCheckPath: /v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_DRIVER
+        value: postgres
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fuel-cost-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: APP_ORIGIN
+        value: https://fuel-cost-estimator-web.vercel.app
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: FUEL_SYNC_ENABLED
+        value: 'true'

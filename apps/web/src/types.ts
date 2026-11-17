@@ -1,5 +1,11 @@
 import type { EstimateResponse, FuelType, LoadRatio } from '@fce/contracts';
 
+declare global {
+  interface Window {
+    __FCE_API_BASE__?: string;
+  }
+}
+
 export type Screen = 'vehicle' | 'route' | 'result';
 
 export interface PlaceName {
