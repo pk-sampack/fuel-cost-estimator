@@ -926,6 +926,11 @@ input:focus-visible {
   min-width: 0;
 }
 
+.distance-time {
+  flex-basis: 100%;
+  margin: 0;
+}
+
 .distance-main .field-label {
   margin-bottom: 2px;
 }

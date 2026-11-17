@@ -1,5 +1,6 @@
 import { fuelTypeLabels, loadRatioLabels, type LoadRatio } from '@fce/contracts';
 import { Money, compactDate, num } from '../components/Money';
+import { formatDuration } from '../numbers';
 import { translate, type Lang } from '../i18n';
 import type { Profile } from '../storage';
 import type { ResultBundle } from '../types';
@@ -136,6 +137,12 @@ export function ResultScreen({ bundle, profile, lang, onEditTrip, onEditProfile 
           <span className="meta-key">{t('result.priceDate')}</span>
           <span className="meta-val" dir="ltr">{compactDate(estimate.fuelPrice.effectiveFrom)}</span>
         </div>
+        {summary.durationS !== null ? (
+          <div className="meta-line">
+            <span className="meta-key">{t('route.travelTime')}</span>
+            <span className="meta-val" dir="ltr">{formatDuration(summary.durationS, lang)}</span>
+          </div>
+        ) : null}
         <div className="meta-line">
           <span className="meta-key">{t('result.driverKmpl')}</span>
           <span className="meta-val">
@@ -181,6 +188,7 @@ function buildShareText({ estimate, summary }: ResultBundle, lang: Lang): string
       ? [
           'ایندھن — سفر کا اندازہ',
           trip,
+          ...(summary.durationS !== null ? [`سفر کا وقت: ${formatDuration(summary.durationS, lang)}`] : []),
           `فاصلہ: ${num(summary.distanceKm, 1)} کلومیٹر`,
           `${fuelLabel}: ${num(price.pricePerLitre, 2)} روپے فی لیٹر (${compactDate(price.effectiveFrom)})`,
           ...estimate.legs.map(
@@ -194,6 +202,7 @@ function buildShareText({ estimate, summary }: ResultBundle, lang: Lang): string
       : [
           'Fuel — trip estimate',
           trip,
+          ...(summary.durationS !== null ? [`Travel time: ${formatDuration(summary.durationS, lang)}`] : []),
           `Distance: ${num(summary.distanceKm, 1)} km`,
           `${fuelLabel}: Rs ${num(price.pricePerLitre, 2)} per litre (${compactDate(price.effectiveFrom)})`,
           ...estimate.legs.map(

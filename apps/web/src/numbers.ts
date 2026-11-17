@@ -38,6 +38,20 @@ export function parseDecimal(input: string): number | null {
   return Number.isFinite(value) ? value : null;
 }
 
+export function formatDuration(seconds: number, lang: 'ur' | 'en'): string {
+  const totalMinutes = Math.max(1, Math.round(seconds / 60));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (lang === 'ur') {
+    if (hours === 0) return `${minutes} منٹ`;
+    if (minutes === 0) return `${hours} گھنٹے`;
+    return `${hours} گھنٹے ${minutes} منٹ`;
+  }
+  if (hours === 0) return `${minutes} min`;
+  if (minutes === 0) return `${hours} hr`;
+  return `${hours} hr ${minutes} min`;
+}
+
 export function roundToHalf(value: number): number {
   return Math.round(value * 2) / 2;
 }

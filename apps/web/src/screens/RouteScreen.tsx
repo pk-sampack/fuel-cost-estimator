@@ -15,7 +15,7 @@ import { LoadGlyph, VehicleGlyph } from '../components/Glyphs';
 import { Money, num, compactDate } from '../components/Money';
 import { PlacePicker } from '../components/PlacePicker';
 import { translate, type Lang } from '../i18n';
-import { normalizeDigits, parseDecimal } from '../numbers';
+import { normalizeDigits, parseDecimal, formatDuration } from '../numbers';
 import type { Profile } from '../storage';
 import type { TripSummary } from '../types';
 
@@ -30,6 +30,7 @@ interface Props {
 
 interface RouteInfo {
   km: number | null;
+  durationS: number | null;
   loading: boolean;
   failed: boolean;
 }
@@ -46,7 +47,7 @@ export function RouteScreen({ vehicleTypes, prices, profile, lang, onEditProfile
   const [destination, setDestination] = useState<PlaceDto | null>(null);
   const [originPickerOpen, setOriginPickerOpen] = useState(false);
   const [destinationPickerOpen, setDestinationPickerOpen] = useState(false);
-  const [routeInfo, setRouteInfo] = useState<RouteInfo>({ km: null, loading: false, failed: false });
+  const [routeInfo, setRouteInfo] = useState<RouteInfo>({ km: null, durationS: null, loading: false, failed: false });
   const [manualMode, setManualMode] = useState(false);
   const [manualKm, setManualKm] = useState('');
 
@@ -79,14 +80,20 @@ export function RouteScreen({ vehicleTypes, prices, profile, lang, onEditProfile
   useEffect(() => {
     if (!origin || !destination || manualMode) return;
     let cancelled = false;
-    setRouteInfo({ km: null, loading: true, failed: false });
+    setRouteInfo({ km: null, durationS: null, loading: true, failed: false });
     api
       .route({ lat: origin.lat, lng: origin.lng }, { lat: destination.lat, lng: destination.lng })
       .then((result) => {
-        if (!cancelled) setRouteInfo({ km: Math.round(result.distanceKm * 10) / 10, loading: false, failed: false });
+        if (!cancelled)
+          setRouteInfo({
+            km: Math.round(result.distanceKm * 10) / 10,
+            durationS: Number.isFinite(result.durationS) ? result.durationS : null,
+            loading: false,
+            failed: false,
+          });
       })
       .catch(() => {
-        if (!cancelled) setRouteInfo({ km: null, loading: false, failed: true });
+        if (!cancelled) setRouteInfo({ km: null, durationS: null, loading: false, failed: true });
       });
     return () => {
       cancelled = true;
@@ -145,6 +152,7 @@ export function RouteScreen({ vehicleTypes, prices, profile, lang, onEditProfile
         origin: originName,
         destination: destinationName,
         distanceKm,
+        durationS: manualMode ? null : routeInfo.durationS,
         fuelType,
         loadRatio: isGoods ? loadRatio : 0,
         returnEmpty,
@@ -243,6 +251,11 @@ export function RouteScreen({ vehicleTypes, prices, profile, lang, onEditProfile
         <button type="button" className="link" onClick={toggleManual}>
           {manualMode ? t('route.useMapDistance') : t('route.editDistance')}
         </button>
+        {!manualMode && routeInfo.km !== null && routeInfo.durationS !== null ? (
+          <p className="hint distance-time">
+            {t('route.travelTime')}: <span dir="ltr">{formatDuration(routeInfo.durationS, lang)}</span>
+          </p>
+        ) : null}
       </div>
       {!manualMode && routeInfo.km === null && !routeInfo.loading ? (
         <p className="hint">{routeInfo.failed ? t('route.missing') : t('route.distanceHint')}</p>

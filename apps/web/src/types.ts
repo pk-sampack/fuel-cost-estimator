@@ -17,6 +17,7 @@ export interface TripSummary {
   origin: PlaceName | null;
   destination: PlaceName | null;
   distanceKm: number;
+  durationS: number | null;
   fuelType: FuelType;
   loadRatio: LoadRatio;
   returnEmpty: boolean;
