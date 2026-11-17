@@ -1,15 +1,10 @@
-# Render Blueprint: NestJS API + Postgres for the Fuel Cost Estimator.
+# Render Blueprint: NestJS API on Render, Postgres on Supabase.
 # Deploy: https://render.com/deploy?repo=https://github.com/pk-sampack/fuel-cost-estimator
 #
-# Note: Render's free Postgres expires 30 days after creation. To use Neon instead,
-# delete the `databases` block and set DATABASE_URL manually in the dashboard.
-
-databases:
-  - name: fuel-cost-db
-    databaseName: fuelcost
-    user: fuelcost
-    plan: free
-    postgresMajorVersion: '16'
+# Before applying, have your Supabase connection string ready:
+#   Supabase -> Project Settings -> Database -> Connection string -> Session pooler
+#   postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres?sslmode=require
+# Paste it when Render asks for DATABASE_URL (it is stored as a secret, not in this file).
 
 services:
   - type: web
@@ -25,9 +20,7 @@ services:
       - key: DB_DRIVER
         value: postgres
       - key: DATABASE_URL
-        fromDatabase:
-          name: fuel-cost-db
-          property: connectionString
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: APP_ORIGIN
